@@ -6,10 +6,10 @@ using UnityEngine.EventSystems;
 
 public class SweetSpots : MonoBehaviour {
 
-    public Vector2 randomSpot;
+    public Vector2 sweetSpot;
     public int levelOfDifficulty;
 
-    float randomSpotsinDeg;
+    public float aveRandomRange;
 
     void Start () {
         OnTouchRandomRange();
@@ -17,21 +17,26 @@ public class SweetSpots : MonoBehaviour {
     
     void Update() {
 
-        foreach (Touch touch in Input.touches) {
+        if (Input.touchCount > 0) {
 
-            int id = touch.fingerId;
+            if(Input.GetTouch(0).phase == TouchPhase.Began) {
 
-            if (EventSystem.current.IsPointerOverGameObject(id)) {
-                OnTouchRandomRange();
+                int id = Input.GetTouch(0).fingerId;
+
+                if (EventSystem.current.IsPointerOverGameObject(id)) {
+                    OnTouchRandomRange();
+                }
             }
         }
     }
 
-    public void OnTouchRandomRange() { 
+    public void OnTouchRandomRange() {
 
-            randomSpotsinDeg = Mathf.RoundToInt(Random.Range(-1f, 2f) * 180f);
+        // Get Random Mean value for the range
+        aveRandomRange = Random.Range(0, 360);
 
-            randomSpot = new Vector2(randomSpotsinDeg - levelOfDifficulty, randomSpotsinDeg + levelOfDifficulty);
+        // Output the random range including the preset level of difficulty
+        sweetSpot = new Vector3(aveRandomRange - levelOfDifficulty, aveRandomRange + levelOfDifficulty, aveRandomRange);
 
     }
 }

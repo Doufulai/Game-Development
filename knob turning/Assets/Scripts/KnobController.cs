@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 public class KnobController : MonoBehaviour {
 
-    public Transform indicator;
+    public GameObject indicator;
     public Text rotationScale;
     public Text sweetSpotDisplay;
     public int difficulty;
@@ -14,21 +14,17 @@ public class KnobController : MonoBehaviour {
     float deltaAngleinDeg;
     int rotationScaleHolder;
     bool firstTouchInsideObject;
-    Vector2 randomSpotRange;
+    Vector3 randomSpotRange;
     Vector3 objectCenter;
 
 	// Use this for initialization
 	void Start () {
-        
+
         // Tag the indicator to be a child under the knob
-        indicator.parent = transform;
+        indicator.transform.parent = transform;
 
         // Get the Gameobject center w.r.t the screen
         objectCenter = Camera.main.WorldToScreenPoint(transform.position);
-
-        randomSpotRange = FindObjectOfType<SweetSpots>().randomSpot;
-
-        sweetSpotDisplay.text = randomSpotRange.x.ToString() + " to " + randomSpotRange.y.ToString();
 
     }
 	
@@ -38,7 +34,7 @@ public class KnobController : MonoBehaviour {
         // Detect touch
         if (Input.touchCount > 0) {
 
-            randomSpotRange = FindObjectOfType<SweetSpots>().randomSpot;
+            randomSpotRange = FindObjectOfType<SweetSpots>().sweetSpot;
 
             sweetSpotDisplay.text = randomSpotRange.x.ToString() + " to " + randomSpotRange.y.ToString();
 
@@ -83,14 +79,30 @@ public class KnobController : MonoBehaviour {
                     // Display the rotation angle in the 3rd and 4th quadrant
                     rotationScaleHolder = 180 + Mathf.RoundToInt(deltaAngleinDeg);
                 }
-
-
-                rotationScale.text = rotationScaleHolder <= 180 ? (-rotationScaleHolder).ToString() + "\u00B0" : (360 - rotationScaleHolder).ToString() + "\u00B0";
                 
-                //// Show the angle in degree in the console
-                //Debug.Log(deltaAngleinDeg);
+                rotationScale.text = rotationScaleHolder <= 180 ? (-rotationScaleHolder).ToString() + "\u00B0" : (360 - rotationScaleHolder).ToString() + "\u00B0";
+
+                // Show the angle in degree in the console
+                //Debug.Log(rotationScaleHolder);
+
+                gameObject.GetComponent<Renderer>().material.color = new Color((randomSpotRange.z - rotationScaleHolder)/180*255, 0, 0);
+                indicator.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+
+                //if (isUnlocked(randomSpotRange, rotationScaleHolder)) {
+                //    Debug.Log(isUnlocked(randomSpotRange, rotationScaleHolder));
+
+                    
+
+                //}
+                //else {
+
+                //    gameObject.GetComponent<Renderer>().material.color = new Color(0, 0, 0);
+                //    indicator.GetComponent<Renderer>().material.color = new Color(0, 0, 0);
+
+                //}
 
             }
+
         }
     }
 
@@ -108,6 +120,8 @@ public class KnobController : MonoBehaviour {
         return Mathf.Rad2Deg * Mathf.Atan((touchCoor.x - objectCenter.x) / (touchCoor.y - objectCenter.y));
     }
 
-
+    bool isUnlocked(Vector3 sweetSpot, int currentAngle) {
+        return currentAngle < sweetSpot.y && currentAngle > sweetSpot.x ? true : false;
+    }
 
 }

@@ -1,6 +1,6 @@
 Android
 PlayerPath?
-C:/Users/wylai/Documents/Work/unity-projects/Game-Development/knob turning/knob_turning.apk
+C:/Users/ASUS-PC/Documents/Game Development/knob turning/knob_turning.apk
 SceneListBegin?
 Assets/Scenes/SampleScene.unity
 SceneListEnd?
@@ -146,5 +146,5 @@ bc68edb0af574bf79f9550ead8ebae5c UnityEngine.HoloLens.dll:UnityEngine.Audio.Audi
 c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.SpatialMappingCollider
 45f3431f0103c41611e8d4eec3d439df UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.SpatialMappingRenderer
 9de3a22eca9aefadba2d10d5987cefe3 UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
-056a221da795bdca0223f48bedce6956 Assembly-CSharp.dll:.KnobController
-f785655c12e1e292d6ea74521a9ed735 Assembly-CSharp.dll:.SweetSpots
+194ea386780feb56c83d741103d6932b Assembly-CSharp.dll:.KnobController
+3cccacdcc5dae6f271eb0ca3cc5fa8e1 Assembly-CSharp.dll:.SweetSpots

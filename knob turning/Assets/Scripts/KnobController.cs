@@ -2,49 +2,112 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class KnobController : MonoBehaviour {
 
     public Transform indicator;
     public Text rotationScale;
+    public Text sweetSpotDisplay;
+    public int difficulty;
     
     float deltaAngleinDeg;
+    int rotationScaleHolder;
+    bool firstTouchInsideObject;
+    Vector2 randomSpotRange;
     Vector3 objectCenter;
 
 	// Use this for initialization
 	void Start () {
-
+        
+        // Tag the indicator to be a child under the knob
         indicator.parent = transform;
+
+        // Get the Gameobject center w.r.t the screen
         objectCenter = Camera.main.WorldToScreenPoint(transform.position);
 
-	}
+        randomSpotRange = FindObjectOfType<SweetSpots>().randomSpot;
+
+        sweetSpotDisplay.text = randomSpotRange.x.ToString() + " to " + randomSpotRange.y.ToString();
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
         
+        // Detect touch
         if (Input.touchCount > 0) {
-            deltaAngleinDeg = getRotationinDeg(objectCenter, Input.GetTouch(0).position);
 
-            if (Input.GetTouch(0).position.y >= objectCenter.y) {
-                transform.eulerAngles = new Vector3(0, 0, -deltaAngleinDeg);
+            randomSpotRange = FindObjectOfType<SweetSpots>().randomSpot;
 
-                if (Input.GetTouch(0).position.x > objectCenter.x) {
-                    rotationScale.text = Mathf.RoundToInt(deltaAngleinDeg).ToString() + "\u00B0";
-                }
-                else {
-                    rotationScale.text = Mathf.RoundToInt(deltaAngleinDeg + 360f).ToString() + "\u00B0";
-                }
-            }else {
-                transform.eulerAngles = new Vector3(0, 0, 180f-deltaAngleinDeg);
+            sweetSpotDisplay.text = randomSpotRange.x.ToString() + " to " + randomSpotRange.y.ToString();
 
-                rotationScale.text = (180 + Mathf.RoundToInt(deltaAngleinDeg)).ToString() + "\u00B0";
+            // Store the direction where the finger points to Gameobject from the camera point of view
+            Ray raycast = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+
+            // Verify if touch.began lies within the object itself. If true, set firstTouchInsideObject to true
+            if (Input.GetTouch(0).phase == TouchPhase.Began) {
+
+                firstTouchInsideObject = Physics.Raycast(raycast) == true ? true : false;
+
             }
             
-            Debug.Log(deltaAngleinDeg);
+            // Verify if touch.began lies within the object itself. If true, object rotation will get activated
+            if (firstTouchInsideObject) {
+
+                // Define the direction of the finger with respect to the Gameobject center
+                deltaAngleinDeg = getRotationinDeg(objectCenter, Input.GetTouch(0).position);
+
+                // Detect if the touch falls in the 1st and 2nd quadrant
+                if (Input.GetTouch(0).position.y >= objectCenter.y) {
+
+                    // Point the object to where the touch is located
+                    transform.eulerAngles = new Vector3(0, 0, -deltaAngleinDeg);
+
+                    // Detect if the touch falls in the 1st quadrant
+                    if (Input.GetTouch(0).position.x > objectCenter.x) {
+
+                        // Display the rotation angle in the 1st quadrant
+                        rotationScaleHolder = Mathf.RoundToInt(deltaAngleinDeg);
+                    }
+                    else {
+
+                        // Display the rotation angle in the 2nd quadrant
+                        rotationScaleHolder = Mathf.RoundToInt(deltaAngleinDeg + 360f);
+                    }
+                }else {
+
+                    // Point the object to where the touch is located 
+                    transform.eulerAngles = new Vector3(0, 0, 180f-deltaAngleinDeg);
+
+                    // Display the rotation angle in the 3rd and 4th quadrant
+                    rotationScaleHolder = 180 + Mathf.RoundToInt(deltaAngleinDeg);
+                }
+
+
+                rotationScale.text = rotationScaleHolder <= 180 ? (-rotationScaleHolder).ToString() + "\u00B0" : (360 - rotationScaleHolder).ToString() + "\u00B0";
+                
+                //// Show the angle in degree in the console
+                //Debug.Log(deltaAngleinDeg);
+
+            }
         }
     }
 
+    /**
+     *  Objective: To calculate the angle of the touch w.r.t the Gameobject
+     * 
+     *  Argument:
+     *  objectCenter    -- Vector3 of the Gameobject center
+     *  touchCoor       -- Vector2 of the touch coordinate
+    
+     *  Returns:
+     *  getRotationinDeg    -- Angle of the touch w.r.t the Gameobject in Degree
+     **/
     float getRotationinDeg(Vector3 objectCenter, Vector2 touchCoor) {
         return Mathf.Rad2Deg * Mathf.Atan((touchCoor.x - objectCenter.x) / (touchCoor.y - objectCenter.y));
     }
+
+
+
 }

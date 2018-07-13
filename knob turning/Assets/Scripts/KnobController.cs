@@ -9,13 +9,17 @@ public class KnobController : MonoBehaviour {
     public GameObject indicator;
     public Text rotationScale;
     public Text sweetSpotDisplay;
+    public Text distance;
+    public Slider frequencyController;
     public int difficulty;
     
     float deltaAngleinDeg;
-    int rotationScaleHolder;
-    bool firstTouchInsideObject;
+    int rotationScaleHolder, frameElapsed;
+    bool isFirstTouchInsideObject, isWithinSPZone;
+    float vibrationElapsedTime;
     Vector3 randomSpotRange;
-    Vector3 objectCenter;
+    Vector2 objectCenter;
+    Vector2 indicatorCenter;
 
 	// Use this for initialization
 	void Start () {
@@ -33,7 +37,7 @@ public class KnobController : MonoBehaviour {
         
         // Detect touch
         if (Input.touchCount > 0) {
-
+          
             randomSpotRange = FindObjectOfType<SweetSpots>().sweetSpot;
 
             sweetSpotDisplay.text = randomSpotRange.x.ToString() + " to " + randomSpotRange.y.ToString();
@@ -41,15 +45,14 @@ public class KnobController : MonoBehaviour {
             // Store the direction where the finger points to Gameobject from the camera point of view
             Ray raycast = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
 
-            // Verify if touch.began lies within the object itself. If true, set firstTouchInsideObject to true
+            // Verify if touch.began lies within the object itself. If true, set isFirstTouchInsideObject to true
             if (Input.GetTouch(0).phase == TouchPhase.Began) {
 
-                firstTouchInsideObject = Physics.Raycast(raycast) == true ? true : false;
+                isFirstTouchInsideObject = Physics.Raycast(raycast) == true ? true : false;
 
             }
-            
             // Verify if touch.began lies within the object itself. If true, object rotation will get activated
-            if (firstTouchInsideObject) {
+            if (isFirstTouchInsideObject) {
 
                 // Define the direction of the finger with respect to the Gameobject center
                 deltaAngleinDeg = getRotationinDeg(objectCenter, Input.GetTouch(0).position);
@@ -79,27 +82,37 @@ public class KnobController : MonoBehaviour {
                     // Display the rotation angle in the 3rd and 4th quadrant
                     rotationScaleHolder = 180 + Mathf.RoundToInt(deltaAngleinDeg);
                 }
-                
+
                 rotationScale.text = rotationScaleHolder <= 180 ? (-rotationScaleHolder).ToString() + "\u00B0" : (360 - rotationScaleHolder).ToString() + "\u00B0";
+
+                //Debug.Log(randomSpotRange.z + " & " + rotationScaleHolder);
+
+                distance.text = Mathf.Abs(toAcute((int)randomSpotRange.z) - toAcute(rotationScaleHolder)).ToString();
 
                 // Show the angle in degree in the console
                 //Debug.Log(rotationScaleHolder);
+                
+                if (isUnlocked(randomSpotRange, rotationScaleHolder)) {
 
-                gameObject.GetComponent<Renderer>().material.color = new Color((randomSpotRange.z - rotationScaleHolder)/180*255, 0, 0);
-                indicator.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+                    //Debug.Log(isUnlocked(randomSpotRange, rotationScaleHolder));
 
-                //if (isUnlocked(randomSpotRange, rotationScaleHolder)) {
-                //    Debug.Log(isUnlocked(randomSpotRange, rotationScaleHolder));
-
+                    // (randomSpotRange.z - rotationScaleHolder) / 180 * 255
                     
+                    gameObject.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+                    indicator.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
 
-                //}
-                //else {
+                    StartCoroutine(Vibrate());
 
-                //    gameObject.GetComponent<Renderer>().material.color = new Color(0, 0, 0);
-                //    indicator.GetComponent<Renderer>().material.color = new Color(0, 0, 0);
+                }
+                else {
 
-                //}
+                    gameObject.GetComponent<Renderer>().material.color = new Color(0, 0, 0);
+                    indicator.GetComponent<Renderer>().material.color = new Color(0, 0, 0);
+
+                    vibrationElapsedTime = 0;
+                    frameElapsed = 0;
+
+                }
 
             }
 
@@ -122,6 +135,26 @@ public class KnobController : MonoBehaviour {
 
     bool isUnlocked(Vector3 sweetSpot, int currentAngle) {
         return currentAngle < sweetSpot.y && currentAngle > sweetSpot.x ? true : false;
+    }
+
+    int toAcute (int angle) {
+        return angle <= 180 ? angle : 360 - angle;
+    }
+
+    IEnumerator Vibrate() {
+        
+        while ((vibrationElapsedTime * frameElapsed) <= frequencyController.value) {
+
+            Handheld.Vibrate();
+
+            frameElapsed += 1;
+
+            vibrationElapsedTime += Time.deltaTime;
+
+            yield return null;
+
+        }
+        
     }
 
 }

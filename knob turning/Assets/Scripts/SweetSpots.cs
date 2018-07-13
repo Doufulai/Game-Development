@@ -6,10 +6,10 @@ using UnityEngine.EventSystems;
 
 public class SweetSpots : MonoBehaviour {
 
-    public Vector2 sweetSpot;
+    public Vector3 sweetSpot;
     public int levelOfDifficulty;
 
-    public float aveRandomRange;
+    public int aveRandomRange;
 
     void Start () {
         OnTouchRandomRange();
